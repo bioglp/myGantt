@@ -1675,7 +1675,7 @@
     const container = document.getElementById('subtasks-container');
     container.innerHTML = '';
     
-    container.className = "space-y-2 p-4 border border-gray-200 dark:border-gray-700/60 rounded-xl bg-gray-50/30 dark:bg-gray-900/10 max-h-56 overflow-y-auto";
+    container.className = "space-y-1 p-2 border border-gray-200 dark:border-gray-700/60 rounded-xl bg-gray-50/30 dark:bg-gray-900/10 max-h-56 overflow-y-auto";
 
     if (subtasks.length === 0) {
         container.innerHTML = `<div class="text-center text-xs text-gray-400 italic py-2">Nessun sottotask inserito. Clicca su "+ Aggiungi Subtask"</div>`;
@@ -1683,10 +1683,13 @@
         return;
     }
 
-    subtasks.forEach((st) => {
+    subtasks.forEach((st, index) => {
         const row = document.createElement('div');
-        // Aggiunta la classe 'draggable-subtask' e l'attributo draggable
-        row.className = "flex items-center gap-2 text-xs subtask-row draggable-subtask bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-2xs";
+        const isNotLast = index < subtasks.length - 1;
+        // Sostituito il bordo per box con una semplice linea di separazione inferiore (tranne l'ultimo elemento)
+        const separatorClass = isNotLast ? "border-b border-gray-100 dark:border-gray-700/60 pb-2 mb-1" : "pb-1";
+        
+        row.className = `flex items-center gap-2 text-xs subtask-row draggable-subtask ${separatorClass}`;
         row.setAttribute('draggable', 'true');
         
         row.innerHTML = `
@@ -1704,7 +1707,6 @@
             </button>
         `;
 
-        // Eventi Drag and Drop per il singolo subtask
         row.addEventListener('dragstart', function(e) {
             this.classList.add('dragging-subtask');
             e.dataTransfer.effectAllowed = 'move';
@@ -1717,7 +1719,6 @@
         container.appendChild(row);
     });
 
-    // Gestione del movimento sopra il contenitore dei subtask
     container.addEventListener('dragover', function(e) {
         e.preventDefault();
         const draggingItem = container.querySelector('.dragging-subtask');
