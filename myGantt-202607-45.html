@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang="it" data-theme="light" data-accent="blue">
+<html lang="it" data-theme="dark" data-accent="blue">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Gantt</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: ['selector', '[data-theme="dark"]'],
@@ -95,12 +93,10 @@
             background-color: var(--accent-light);
         }
 
-        /* Stile specifico per il bordo del riquadro della data odierna */
         .today-cell {
             border: 2px solid var(--accent-primary) !important;
         }
 
-        /* Stili per la modalità Fullscreen del Gantt Globale */
         #tab-content-global:fullscreen {
             width: 100vw;
             height: 100vh;
@@ -162,7 +158,6 @@
             </div>
         </header>
 
-        <!-- Sezione Dati Generali del Progetto -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 space-y-4 transition-colors duration-200">
             <h2 class="text-lg font-semibold text-accent">Informazioni Progetto</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -325,7 +320,6 @@
         </div>
     </div>
 
-    <!-- Modale Unificato per Creazione e Modifica Task -->
     <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-xl w-full p-6 space-y-4 transition-colors duration-200 max-h-[90vh] flex flex-col">
             <h3 class="text-lg font-bold text-gray-800 dark:text-white" id="modal-title">Modifica Task</h3>
@@ -354,14 +348,21 @@
                     </div>
                 </div>
                 
-                <!-- Finestre Temporali Multiple con Progresso Univoco su Due Righe -->
                 <div class="space-y-2">
                     <div class="flex justify-between items-center">
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300">Finestre Temporali e Progressi</label>
                         <button type="button" onclick="addIntervalRow()" class="text-xs px-2.5 py-1 bg-accent text-white rounded-lg hover:opacity-90 font-medium transition shadow-sm">+ Aggiungi Periodo</button>
                     </div>
                     <div id="intervals-container" class="space-y-3 max-h-72 overflow-y-auto p-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/50 dark:bg-gray-900/30">
-                        <!-- Righe dinamiche -->
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300">Sottotask</label>
+                        <button type="button" onclick="addSubtaskRow()" class="text-xs px-2.5 py-1 bg-accent text-white rounded-lg hover:opacity-90 font-medium transition shadow-sm">+ Aggiungi Sottotask</button>
+                    </div>
+                    <div id="subtasks-container" class="space-y-2 max-h-48 overflow-y-auto p-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/50 dark:bg-gray-900/30">
                     </div>
                 </div>
 
@@ -514,6 +515,10 @@
                 groupColor: "#af52de",
                 intervals: [
                     { startYear: "2026", startQ: "Q3", endYear: "2026", endQ: "Q4", progress: 0 }
+                ],
+                subtasks: [
+                    { name: "Raccolta immagini e bozze", completed: true },
+                    { name: "Impaginazione grafica", completed: false }
                 ]
             },
             {
@@ -525,7 +530,8 @@
                 intervals: [
                     { startYear: "2026", startQ: "Q2", endYear: "2026", endQ: "Q2", progress: 0 },
                     { startYear: "2027", startQ: "Q2", endYear: "2027", endQ: "Q2", progress: 0 }
-                ]
+                ],
+                subtasks: []
             },
             {
                 id: "_fq885a2r6",
@@ -536,7 +542,8 @@
                 intervals: [
                     { startYear: "2026", startQ: "Q4", endYear: "2026", endQ: "Q4", progress: 0 },
                     { startYear: "2026", startQ: "Q1", endYear: "2026", endQ: "Q1", progress: 100 }
-                ]
+                ],
+                subtasks: []
             },
             {
                 id: "_79jdwaqyl",
@@ -546,7 +553,8 @@
                 groupColor: "#ff9500",
                 intervals: [
                     { startYear: "2026", startQ: "Q2", endYear: "2026", endQ: "Q4", progress: 0 }
-                ]
+                ],
+                subtasks: []
             },
             {
                 id: "_w7aa38lwk",
@@ -557,7 +565,8 @@
                 intervals: [
                     { startYear: "2026", startQ: "Q3", endYear: "2026", endQ: "Q3", progress: 0 },
                     { startYear: "2027", startQ: "Q3", endYear: "2027", endQ: "Q3", progress: 0 }
-                ]
+                ],
+                subtasks: []
             }
         ];
 
@@ -586,13 +595,22 @@
                 intervals = [{ startYear: '2026', startQ: 'Q1', endYear: '2026', endQ: 'Q4', progress: 0 }];
             }
 
+            let subtasks = [];
+            if (t.subtasks && Array.isArray(t.subtasks)) {
+                subtasks = t.subtasks.map(st => ({
+                    name: st.name || '',
+                    completed: !!st.completed
+                }));
+            }
+
             return {
                 id: t.id || '_' + Math.random().toString(36).substr(2, 9),
                 name: t.name || 'Senza nome',
                 description: t.description || '',
                 group: t.group || 'Generale',
                 groupColor: t.groupColor || '#0063db',
-                intervals: intervals
+                intervals: intervals,
+                subtasks: subtasks
             };
         });
         
@@ -746,7 +764,6 @@
             const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
             const labels = { 'Q1': 'Gen - Mar', 'Q2': 'Apr - Giu', 'Q3': 'Lug - Set', 'Q4': 'Ott - Dic' };
 
-            // Controllo data odierna per evidenziare il trimestre corrente nel diagramma annuale
             const today = new Date();
             const todayYearStr = today.getFullYear().toString();
             const todayQuarterStr = 'Q' + Math.ceil((today.getMonth() + 1) / 3);
@@ -784,7 +801,6 @@
                     });
                 });
                 
-                // Applicazione della classe today-cell se corrisponde all'anno e trimestre correnti
                 const isTodayQuarter = (currentYearFilter === todayYearStr && q === todayQuarterStr);
                 const cardBorderClass = isTodayQuarter ? 'today-cell' : 'border-gray-200 dark:border-gray-700';
 
@@ -811,6 +827,13 @@
                         <div class="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-200 dark:border-gray-700/80 space-y-2 relative shadow-2xs">
                             <div class="flex justify-between items-start gap-2">
                                 <span class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate w-full" title="${t.name}">${t.name}</span>
+                                
+                                <!-- MODIFICA: Sostituito text-accent con style="color: ${taskColor};" per seguire il colore del gruppo -->
+                                <button onclick="openEditModal('${t.id}')" title="Modifica Task" class="p-1 hover:bg-accent/10 rounded transition shrink-0" style="color: ${taskColor};">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
                             </div>
                             ${t.description ? `<p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">${t.description}</p>` : ''}
                             <div class="flex justify-between items-center gap-2">
@@ -920,7 +943,6 @@
                             </div>
                         `;
                     } else if (isCovered) {
-                        // Coperto da un blocco iniziato altrove
                     } else {
                         tbodyHTML += `<span class="text-gray-300 dark:text-gray-600 text-[10px]">-</span>`;
                     }
@@ -1001,8 +1023,8 @@
             const prefix = getFilePrefix();
             const years = getProjectYears();
 
-            let headerRow1 = ["Gruppo", "Attività", "Descrizione"];
-            let headerRow2 = ["", "", ""];
+            let headerRow1 = ["Gruppo", "Attività", "Descrizione", "Sottotask"];
+            let headerRow2 = ["", "", "", ""];
 
             years.forEach(y => {
                 headerRow1.push(y, "", "", "");
@@ -1022,10 +1044,15 @@
             });
 
             tasks.forEach(t => {
+                const subsText = (t.subtasks && t.subtasks.length > 0) 
+                    ? t.subtasks.map(s => `${s.completed ? '[X]' : '[ ]'} ${s.name}`).join(' | ') 
+                    : '';
+
                 const rowData = [
                     `"${t.group.replace(/"/g, '""')}"`,
                     `"${t.name.replace(/"/g, '""')}"`,
-                    `"${(t.description || '').replace(/"/g, '""')}"`
+                    `"${(t.description || '').replace(/"/g, '""')}"`,
+                    `"${subsText.replace(/"/g, '""')}"`
                 ];
 
                 timeCols.forEach((col) => {
@@ -1105,13 +1132,22 @@
                             }];
                         }
 
+                        let subtasks = [];
+                        if (t.subtasks && Array.isArray(t.subtasks)) {
+                            subtasks = t.subtasks.map(st => ({
+                                name: st.name || '',
+                                completed: !!st.completed
+                            }));
+                        }
+
                         return {
                             id: t.id || '_' + Math.random().toString(36).substr(2, 9),
                             name: t.name || 'Senza nome',
                             description: t.description || '',
                             group: t.group || 'Generale',
                             groupColor: t.groupColor || '#0063db',
-                            intervals: intervals
+                            intervals: intervals,
+                            subtasks: subtasks
                         };
                     });
 
@@ -1125,6 +1161,27 @@
                 event.target.value = '';
             };
             reader.readAsText(file);
+        }
+
+        function toggleSubtasksCollapse(taskId) {
+            const container = document.getElementById(`subtasks-collapse-${taskId}`);
+            const icon = document.getElementById(`subtasks-chevron-${taskId}`);
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                container.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function toggleSubtaskCompleted(taskId, subtaskIndex, checkbox) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task && task.subtasks && task.subtasks[subtaskIndex]) {
+                task.subtasks[subtaskIndex].completed = checkbox.checked;
+                localStorage.setItem('gantt_interval_tasks', JSON.stringify(tasks));
+                renderTable();
+            }
         }
 
         function renderTable() {
@@ -1157,6 +1214,34 @@
                 }
                 intervalsHtml += '</div>';
 
+                let subtasksHtml = '';
+                let toggleButtonHtml = '';
+                
+                if (t.subtasks && t.subtasks.length > 0) {
+                    toggleButtonHtml = `
+                        <button type="button" onclick="toggleSubtasksCollapse('${t.id}')" class="p-1 text-gray-500 hover:text-accent rounded transition shrink-0 inline-flex items-center justify-center w-6 h-6" title="Mostra/Nascondi Sottotask">
+                            <svg id="subtasks-chevron-${t.id}" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    `;
+                    
+                    subtasksHtml = `
+                        <div id="subtasks-collapse-${t.id}" class="hidden mt-2 space-y-1.5 border-l-2 border-accent/30 pl-3">
+                    `;
+                    t.subtasks.forEach((st, idx) => {
+                        subtasksHtml += `
+                            <div class="flex items-center gap-2 text-xs">
+                                <input type="checkbox" ${st.completed ? 'checked' : ''} onchange="toggleSubtaskCompleted('${t.id}', ${idx}, this)" class="w-3.5 h-3.5 rounded border-gray-300 text-accent focus:ring-accent cursor-pointer">
+                                <span class="${st.completed ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-200'}">${st.name}</span>
+                            </div>
+                        `;
+                    });
+                    subtasksHtml += `</div>`;
+                } else {
+                    toggleButtonHtml = `<div class="w-6 h-6 shrink-0"></div>`;
+                }
+
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition text-sm draggable-row";
                 tr.setAttribute('draggable', 'true');
@@ -1170,8 +1255,14 @@
                     </td>
                     <td class="p-3"><span class="px-2 py-1 rounded text-xs font-semibold uppercase inline-block" style="${getGroupBadgeStyle(t)}">${t.group}</span></td>
                     <td class="p-3">
-                        <div class="font-semibold text-gray-800 dark:text-gray-200">${t.name}</div>
-                        ${t.description ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${t.description}</div>` : ''}
+                        <div class="flex items-start gap-2">
+                            ${toggleButtonHtml}
+                            <div class="flex-grow min-w-0">
+                                <div class="font-semibold text-gray-800 dark:text-gray-200 break-words">${t.name}</div>
+                                ${t.description ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 break-words">${t.description}</div>` : ''}
+                                ${subtasksHtml}
+                            </div>
+                        </div>
                     </td>
                     <td class="p-3">${intervalsHtml}</td>
                     <td class="p-3 text-center whitespace-nowrap">
@@ -1317,6 +1408,59 @@
             return intervals;
         }
 
+        function renderSubtaskRows(subtasks = []) {
+            const container = document.getElementById('subtasks-container');
+            container.innerHTML = '';
+
+            subtasks.forEach((st) => {
+                const row = document.createElement('div');
+                row.className = "flex flex-col gap-2 bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 subtask-row shadow-sm text-xs";
+                
+                row.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" class="subtask-completed w-4 h-4 rounded border-gray-300 text-accent focus:ring-accent cursor-pointer" ${st.completed ? 'checked' : ''} onchange="updateSubtaskBar(this)">
+                        <input type="text" class="subtask-name border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-1.5 rounded flex-grow text-xs focus:ring-2 focus:ring-accent focus:outline-none" placeholder="Nome sottotask..." value="${(st.name || '').replace(/"/g, '&quot;')}">
+                        <button type="button" onclick="this.closest('.subtask-row').remove()" class="text-red-500 hover:text-red-700 px-2 py-1 font-bold bg-red-50 dark:bg-red-900/30 rounded transition shrink-0" title="Rimuovi sottotask">&times;</button>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden transition-all duration-300 ${st.completed ? 'opacity-100' : 'opacity-30'}">
+                        <div class="subtask-progress-bar h-1.5 rounded-full bg-accent transition-all duration-300" style="width: ${st.completed ? '100%' : '0%'}"></div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function updateSubtaskBar(checkbox) {
+            const row = checkbox.closest('.subtask-row');
+            const barContainer = row.querySelector('.bg-gray-200');
+            const progressBar = row.querySelector('.subtask-progress-bar');
+            if (checkbox.checked) {
+                barContainer.classList.remove('opacity-30');
+                barContainer.classList.add('opacity-100');
+                progressBar.style.width = '100%';
+            } else {
+                barContainer.classList.remove('opacity-100');
+                barContainer.classList.add('opacity-30');
+                progressBar.style.width = '0%';
+            }
+        }
+
+        function addSubtaskRow() {
+            renderSubtaskRows([...getSubtasksFromDOM(), { name: '', completed: false }]);
+        }
+
+        function getSubtasksFromDOM() {
+            const rows = document.querySelectorAll('.subtask-row');
+            let subtasks = [];
+            rows.forEach(r => {
+                subtasks.push({
+                    name: r.querySelector('.subtask-name').value.trim(),
+                    completed: r.querySelector('.subtask-completed').checked
+                });
+            });
+            return subtasks.filter(s => s.name.length > 0);
+        }
+
         function openNewTaskModal() {
             document.getElementById('edit-id').value = '';
             document.getElementById('modal-title').innerText = 'Aggiungi Nuovo Task';
@@ -1329,6 +1473,7 @@
             renderColorDots(defaultColor);
 
             renderIntervalRows([]);
+            renderSubtaskRows([]);
 
             document.getElementById('edit-modal').classList.remove('hidden');
         }
@@ -1348,6 +1493,7 @@
             renderColorDots(taskColor);
 
             renderIntervalRows(task.intervals);
+            renderSubtaskRows(task.subtasks || []);
 
             document.getElementById('edit-modal').classList.remove('hidden');
         }
@@ -1365,6 +1511,7 @@
             const group = document.getElementById('edit-group').value;
             const groupColor = document.getElementById('edit-group-color').value;
             const intervals = getIntervalsFromDOM();
+            const subtasks = getSubtasksFromDOM();
 
             if (intervals.length === 0) {
                 alert("Inserisci almeno una finestra temporale per il task.");
@@ -1376,7 +1523,8 @@
                 description,
                 group,
                 groupColor,
-                intervals
+                intervals,
+                subtasks
             };
 
             if (id) {
