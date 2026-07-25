@@ -361,8 +361,8 @@
 
                 <div class="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                     <div class="flex justify-between items-center">
-                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300">Sottotask</label>
-                        <button type="button" onclick="addSubtaskRow()" class="text-xs px-2.5 py-1 bg-accent text-white rounded-lg hover:opacity-90 font-medium transition shadow-sm">+ Aggiungi Sottotask</button>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300">Subtask</label>
+                        <button type="button" onclick="addSubtaskRow()" class="text-xs px-2.5 py-1 bg-accent text-white rounded-lg hover:opacity-90 font-medium transition shadow-sm">+ Aggiungi Subtask</button>
                     </div>
                     <div id="subtasks-container" class="space-y-2 max-h-48 overflow-y-auto p-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/50 dark:bg-gray-900/30">
                     </div>
@@ -990,7 +990,7 @@
             const prefix = getFilePrefix();
             const years = getProjectYears();
 
-            let headerRow1 = ["Gruppo", "Attività", "Descrizione", "Sottotask"];
+            let headerRow1 = ["Gruppo", "Attività", "Descrizione", "Subtask"];
             let headerRow2 = ["", "", "", ""];
 
             years.forEach(y => {
@@ -1193,7 +1193,7 @@
                 
                 if (t.subtasks && t.subtasks.length > 0) {
                     toggleButtonHtml = `
-                        <button type="button" onclick="toggleSubtasksCollapse('${t.id}')" class="p-1 text-gray-500 hover:text-accent rounded transition shrink-0 inline-flex items-center justify-center w-6 h-6" title="Mostra/Nascondi Sottotask">
+                        <button type="button" onclick="toggleSubtasksCollapse('${t.id}')" class="p-1 text-gray-500 hover:text-accent rounded transition shrink-0 inline-flex items-center justify-center w-6 h-6" title="Mostra/Nascondi Subtask">
                             <svg id="subtasks-chevron-${t.id}" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -1395,11 +1395,11 @@
     const container = document.getElementById('subtasks-container');
     container.innerHTML = '';
     
-    // Contenitore unico pulito per i sottotask
+    // Contenitore unico pulito per i Subtask
     container.className = "space-y-3 p-4 border border-gray-200 dark:border-gray-700/60 rounded-xl bg-gray-50/30 dark:bg-gray-900/10 max-h-56 overflow-y-auto";
 
     if (subtasks.length === 0) {
-        container.innerHTML = `<div class="text-center text-xs text-gray-400 italic py-2">Nessun sottotask inserito. Clicca su "+ Aggiungi Sottotask"</div>`;
+        container.innerHTML = `<div class="text-center text-xs text-gray-400 italic py-2">Nessun Subtask inserito. Clicca su "+ Aggiungi Subtask"</div>`;
         return;
     }
 
@@ -1409,8 +1409,8 @@
         
         row.innerHTML = `
             <input type="checkbox" class="subtask-completed w-4 h-4 rounded border-gray-300 text-accent focus:ring-accent cursor-pointer shrink-0" ${st.completed ? 'checked' : ''}>
-            <input type="text" class="subtask-name border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-1.5 px-2.5 rounded-lg flex-grow text-xs focus:ring-2 focus:ring-accent focus:outline-none" placeholder="Nome sottotask..." value="${(st.name || '').replace(/"/g, '&quot;')}">
-            <button type="button" onclick="this.closest('.subtask-row').remove(); if(document.querySelectorAll('.subtask-row').length === 0) renderSubtaskRows([]);" class="text-gray-400 hover:text-red-500 p-1.5 rounded-lg transition-colors shrink-0 dynamic-trash-btn" title="Rimuovi sottotask">
+            <input type="text" class="subtask-name border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-1.5 px-2.5 rounded-lg flex-grow text-xs focus:ring-2 focus:ring-accent focus:outline-none" placeholder="Nome Subtask..." value="${(st.name || '').replace(/"/g, '&quot;')}">
+            <button type="button" onclick="this.closest('.subtask-row').remove(); if(document.querySelectorAll('.subtask-row').length === 0) renderSubtaskRows([]);" class="text-gray-400 hover:text-red-500 p-1.5 rounded-lg transition-colors shrink-0 dynamic-trash-btn" title="Rimuovi Subtask">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                 </svg>
