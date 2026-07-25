@@ -511,22 +511,22 @@
         const defaultTasks = [
             {
                 id: "_qew6e3zuy",
-                name: "Brochure atlante odonati",
-                description: "Realizzazione e stampa brochure divulgativa",
+                name: "Raccolta dati",
+                description: "Campagna di raccolta nuovi dati",
                 group: "D4",
                 groupColor: "#af52de",
                 intervals: [
                     { startYear: "2026", startQ: "Q3", endYear: "2026", endQ: "Q4", progress: 0 }
                 ],
                 subtasks: [
-                    { name: "Raccolta immagini e bozze", completed: true },
-                    { name: "Impaginazione grafica", completed: false }
+                    { name: "Subtask 1", completed: true },
+                    { name: "Subtask 2", completed: false }
                 ]
             },
             {
                 id: "_7n88407cz",
-                name: "CMR castellani",
-                description: "Campagne di marcatura e ricattura",
+                name: "Sviluppo prototipo",
+                description: "Progettazione e sviluppo prototipo",
                 group: "D1",
                 groupColor: "#34c759",
                 intervals: [
@@ -535,41 +535,6 @@
                 ],
                 subtasks: []
             },
-            {
-                id: "_fq885a2r6",
-                name: "lavori Casco dell'Acqua",
-                description: "Interventi di manutenzione e ripristino ambientale",
-                group: "C11",
-                groupColor: "#34c759",
-                intervals: [
-                    { startYear: "2026", startQ: "Q4", endYear: "2026", endQ: "Q4", progress: 0 },
-                    { startYear: "2026", startQ: "Q1", endYear: "2026", endQ: "Q1", progress: 100 }
-                ],
-                subtasks: []
-            },
-            {
-                id: "_79jdwaqyl",
-                name: "AFI Trasimeno",
-                description: "Analisi faunistica integrata area Trasimeno",
-                group: "C11",
-                groupColor: "#ff9500",
-                intervals: [
-                    { startYear: "2026", startQ: "Q2", endYear: "2026", endQ: "Q4", progress: 0 }
-                ],
-                subtasks: []
-            },
-            {
-                id: "_w7aa38lwk",
-                name: "monitoraggio Lindenia",
-                description: "Verifica popolazione e areale",
-                group: "D1",
-                groupColor: "#ff9500",
-                intervals: [
-                    { startYear: "2026", startQ: "Q3", endYear: "2026", endQ: "Q3", progress: 0 },
-                    { startYear: "2027", startQ: "Q3", endYear: "2027", endQ: "Q3", progress: 0 }
-                ],
-                subtasks: []
-            }
         ];
 
         let rawStoredTasks = JSON.parse(localStorage.getItem('gantt_interval_tasks'));
@@ -617,8 +582,8 @@
         });
         
         let projectMeta = JSON.parse(localStorage.getItem('gantt_project_meta')) || {
-            title: 'lifeIMAGINE',
-            code: 'lifeIMAGINE2026',
+            title: 'Progetto',
+            code: 'Proj_2026',
             notes: 'Programmazione attività da svolgere per il prossimo biennio'
         };
 
@@ -1082,6 +1047,10 @@
 
         function exportJSON() {
             const prefix = getFilePrefix();
+    
+            // Ottiene la data corrente in formato YYYY-MM-DD
+            const today = new Date().toISOString().split('T')[0];
+    
             const backupData = {
                 projectMeta: projectMeta,
                 tasks: tasks
@@ -1089,7 +1058,10 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", prefix + "backup.json");
+    
+            // Aggiunta della data alla fine del nome del file
+            downloadAnchor.setAttribute("download", prefix + "backup_" + today + ".json");
+    
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
