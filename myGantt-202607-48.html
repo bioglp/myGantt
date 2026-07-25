@@ -1672,34 +1672,81 @@
         }
 
         function renderSubtaskRows(subtasks = []) {
-            const container = document.getElementById('subtasks-container');
-            container.innerHTML = '';
-            
-            container.className = "space-y-3 p-4 border border-gray-200 dark:border-gray-700/60 rounded-xl bg-gray-50/30 dark:bg-gray-900/10 max-h-56 overflow-y-auto";
+    const container = document.getElementById('subtasks-container');
+    container.innerHTML = '';
+    
+    container.className = "space-y-2 p-4 border border-gray-200 dark:border-gray-700/60 rounded-xl bg-gray-50/30 dark:bg-gray-900/10 max-h-56 overflow-y-auto";
 
-            if (subtasks.length === 0) {
-                container.innerHTML = `<div class="text-center text-xs text-gray-400 italic py-2">Nessun sottotask inserito. Clicca su "+ Aggiungi Subtask"</div>`;
-                updateSubtaskCounter();
-                return;
-            }
+    if (subtasks.length === 0) {
+        container.innerHTML = `<div class="text-center text-xs text-gray-400 italic py-2">Nessun sottotask inserito. Clicca su "+ Aggiungi Subtask"</div>`;
+        updateSubtaskCounter();
+        return;
+    }
 
-            subtasks.forEach((st) => {
-                const row = document.createElement('div');
-                row.className = "flex items-center gap-3 text-xs subtask-row";
-                
-                row.innerHTML = `
-                    <input type="checkbox" class="subtask-completed w-4 h-4 rounded border-gray-300 text-accent focus:ring-accent cursor-pointer shrink-0" onchange="updateSubtaskCounter()" ${st.completed ? 'checked' : ''}>
-                    <input type="text" class="subtask-name border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-1.5 px-2.5 rounded-lg flex-grow text-xs focus:ring-2 focus:ring-accent focus:outline-none" placeholder="Nome sottotask..." value="${(st.name || '').replace(/"/g, '&quot;')}" oninput="updateSubtaskCounter()" onkeydown="if(event.key === 'Enter') { event.preventDefault(); addSubtaskRow(); }">
-                    <button type="button" onclick="this.closest('.subtask-row').remove(); if(document.querySelectorAll('.subtask-row').length === 0) renderSubtaskRows([]); else updateSubtaskCounter();" class="text-gray-400 hover:text-red-500 p-1.5 rounded-lg transition-colors shrink-0 dynamic-trash-btn" title="Rimuovi sottotask">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                        </svg>
-                    </button>
-                `;
-                container.appendChild(row);
-            });
-            updateSubtaskCounter();
+    subtasks.forEach((st) => {
+        const row = document.createElement('div');
+        // Aggiunta la classe 'draggable-subtask' e l'attributo draggable
+        row.className = "flex items-center gap-2 text-xs subtask-row draggable-subtask bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-2xs";
+        row.setAttribute('draggable', 'true');
+        
+        row.innerHTML = `
+            <span class="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 select-none px-1" title="Trascina per riordinare">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 8h16M4 16h16" />
+                </svg>
+            </span>
+            <input type="checkbox" class="subtask-completed w-4 h-4 rounded border-gray-300 text-accent focus:ring-accent cursor-pointer shrink-0" onchange="updateSubtaskCounter()" ${st.completed ? 'checked' : ''}>
+            <input type="text" class="subtask-name border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-1.5 rounded-md flex-grow focus:ring-2 focus:ring-accent focus:outline-none" placeholder="Nome subtask..." value="${st.name || ''}" oninput="updateSubtaskCounter()">
+            <button type="button" onclick="this.closest('.subtask-row').remove(); updateSubtaskCounter();" class="text-gray-400 hover:text-red-500 p-1 rounded transition shrink-0" title="Rimuovi subtask">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        `;
+
+        // Eventi Drag and Drop per il singolo subtask
+        row.addEventListener('dragstart', function(e) {
+            this.classList.add('dragging-subtask');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        row.addEventListener('dragend', function(e) {
+            this.classList.remove('dragging-subtask');
+        });
+
+        container.appendChild(row);
+    });
+
+    // Gestione del movimento sopra il contenitore dei subtask
+    container.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        const draggingItem = container.querySelector('.dragging-subtask');
+        if (!draggingItem) return;
+
+        const afterElement = getSubtaskDragAfterElement(container, e.clientY);
+        if (afterElement == null) {
+            container.appendChild(draggingItem);
+        } else {
+            container.insertBefore(draggingItem, afterElement);
         }
+    });
+
+    updateSubtaskCounter();
+}
+
+function getSubtaskDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.draggable-subtask:not(.dragging-subtask)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
 
         function addSubtaskRow() {
             renderSubtaskRows([...getSubtasksFromDOM(), { name: '', completed: false }]);
@@ -1708,16 +1755,17 @@
         }
 
         function getSubtasksFromDOM() {
-            const rows = document.querySelectorAll('.subtask-row');
-            let subtasks = [];
-            rows.forEach(r => {
-                subtasks.push({
-                    name: r.querySelector('.subtask-name').value.trim(),
-                    completed: r.querySelector('.subtask-completed').checked
-                });
-            });
-            return subtasks.filter(s => s.name.length > 0);
+    const rows = document.querySelectorAll('.subtask-row');
+    let subtasks = [];
+    rows.forEach(r => {
+        const name = r.querySelector('.subtask-name').value.trim();
+        const completed = r.querySelector('.subtask-completed').checked;
+        if (name !== "") {
+            subtasks.push({ name, completed });
         }
+    });
+    return subtasks;
+}
 
         function updateSubtaskCounter() {
             const subtasks = getSubtasksFromDOM();
